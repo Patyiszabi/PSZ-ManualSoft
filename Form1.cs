@@ -10,7 +10,6 @@ namespace PSZ_ManualSoft
 {
     public partial class Form1 : Form
     {
-        // ====== ADAT ======
         List<DeviceRecord> devices = new List<DeviceRecord>();
         string dataFile => Path.Combine(Application.StartupPath, "devices.txt");
 
@@ -22,7 +21,6 @@ namespace PSZ_ManualSoft
             FillCategoryCombo();
             RefreshList();
 
-            // Események egyszerűen
             deviceListBox.SelectedIndexChanged += (s, e) => ShowDetails(Selected);
             searchTextBox.TextChanged += (s, e) => RefreshList();
             categoryFilterCombo.SelectedIndexChanged += (s, e) => RefreshList();
@@ -40,7 +38,6 @@ namespace PSZ_ManualSoft
 
         DeviceRecord Selected => deviceListBox.SelectedItem as DeviceRecord;
 
-        // ====== BETÖLTÉS / MENTÉS ======
         void LoadDevices()
         {
             devices.Clear();
@@ -59,7 +56,6 @@ namespace PSZ_ManualSoft
             File.WriteAllLines(dataFile, lines);
         }
 
-        // ====== KATEGÓRIA SZŰRŐ ======
         void FillCategoryCombo()
         {
             var cats = devices.Select(d => d.Category)
@@ -74,7 +70,6 @@ namespace PSZ_ManualSoft
             categoryFilterCombo.SelectedIndex = 0;
         }
 
-        // ====== LISTA FRISSÍTÉS (keresés + szűrés) ======
         void RefreshList()
         {
             string s = (searchTextBox.Text ?? "").Trim();
@@ -93,7 +88,6 @@ namespace PSZ_ManualSoft
             ShowDetails(Selected);
         }
 
-        // ====== RÉSZLETEK ======
         void ShowDetails(DeviceRecord d)
         {
             bool ok = d != null;
@@ -111,7 +105,6 @@ namespace PSZ_ManualSoft
             devicePicture.Image = ok ? LoadImage(d.Image) : null;
         }
 
-        // ====== ÚJ / TÖRÖL ======
         void AddDevice()
         {
             using (var dlg = new NewDeviceForm())
@@ -138,7 +131,6 @@ namespace PSZ_ManualSoft
             }
         }
 
-        // ====== MEGNYITÁS (bin\\Debug + URL fallback) ======
         void Open(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -161,19 +153,16 @@ namespace PSZ_ManualSoft
 
         string Resolve(string raw)
         {
-            raw = raw.Trim().Trim('"'); // Sony idézőjel hibák ellen
+            raw = raw.Trim().Trim('"');
 
-            // URL → böngésző
             if (Uri.IsWellFormedUriString(raw, UriKind.Absolute))
                 return raw;
 
-            // ha létezik úgy, ahogy van
             if (File.Exists(raw))
                 return raw;
 
             string baseDir = Application.StartupPath;
 
-            // ha benne van a te géped útja: ...\bin\Debug\Kezikonyvek\lg.pdf → Kezikonyvek\lg.pdf
             const string marker = "\\bin\\Debug\\";
             int i = raw.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
             if (i >= 0)
@@ -183,7 +172,6 @@ namespace PSZ_ManualSoft
                 if (File.Exists(p)) return p;
             }
 
-            // fájlnév alapján keresés a 4 mappában
             string file = Path.GetFileName(raw);
             string[] folders = { "Kezikonyvek", "Garanciak", "Szamlak", "Kepek" };
             foreach (var f in folders)
@@ -192,7 +180,6 @@ namespace PSZ_ManualSoft
                 if (File.Exists(p)) return p;
             }
 
-            // végső fallback
             return raw;
         }
 
@@ -201,16 +188,14 @@ namespace PSZ_ManualSoft
             if (string.IsNullOrWhiteSpace(raw)) return null;
 
             string p = Resolve(raw);
-            if (Uri.IsWellFormedUriString(p, UriKind.Absolute)) return null; // képet URL-ről nem töltünk
+            if (Uri.IsWellFormedUriString(p, UriKind.Absolute)) return null;
 
             if (!File.Exists(p)) return null;
 
-            // egyszerű: Image.FromFile (ha lock gond lenne, lehet byte-os módszer)
             try { return Image.FromFile(p); }
             catch { return null; }
         }
 
-        // ====== REKORD ======
         class DeviceRecord
         {
             public string Name, Category, Manual, Warranty, Invoice, Image;
@@ -239,7 +224,6 @@ namespace PSZ_ManualSoft
             }
         }
 
-        // ====== ÚJ ESZKÖZ ABLAK (minimalista) ======
         class NewDeviceForm : Form
         {
             public DeviceRecord Result;
