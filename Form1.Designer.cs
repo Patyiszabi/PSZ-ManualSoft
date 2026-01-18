@@ -83,6 +83,7 @@
             this.searchTextBox.Name = "searchTextBox";
             this.searchTextBox.Size = new System.Drawing.Size(250, 23);
             this.searchTextBox.TabIndex = 0;
+            
             // 
             // categoryFilterCombo
             // 
